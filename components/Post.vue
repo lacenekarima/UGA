@@ -15,7 +15,6 @@
                         <Icon v-if="!isDeleting" name="bi:three-dots" color="#ffffff" size="18"/>
                         <Icon v-else name="eos-icons:bubble-loading" color="#ffffff" size="18"/>
                     </button>
-
                     <div v-if="isMenu" class="absolute border border-gray-600 right-0 z-20 mt-1 rounded">
                         <button  
                             @click="deletePost"
@@ -39,34 +38,17 @@
                         class="mx-auto w-full mt-2 pr-2 rounded" 
                         :src="post.picture" 
                     />
-
-                    <div class="absolute mt-2 w-full ml-2">
-                        <button 
-                            :disabled="isLike"
-                            class="flex items-center gap-1"
-                            @click="toggleLike"
-                        >
+                    <div class="mt-2">
+                        <button class="flex items-center gap-1" @click="toggleLike">
                             <Icon 
-                                v-if="!hasLikedComputed"
-                                class="p-1 text-white hover:bg-gray-800 rounded-full cursor-pointer" 
-                                name="mdi:cards-heart-outline" 
-                                size="28"
-                            />
-                            <Icon 
-                                v-else
-                                class="p-1 text-red-500 hover:bg-gray-800 rounded-full cursor-pointer" 
-                                name="mdi:cards-heart" 
+                                :name="hasLikedComputed ? 'mdi:cards-heart' : 'mdi:cards-heart-outline'"
+                                :class="hasLikedComputed ? 'text-red-500' : 'text-white'"
+                                class="p-1 hover:bg-gray-800 rounded-full cursor-pointer"
                                 size="28"
                             />
                         </button>
-                        <div class="relative text-sm text-gray-500">
-                            <div> 
-                                <span v-if="post.likes && !isLike">{{ post.likes.length }}</span>
-                                <span v-else>
-                                    <Icon name="eos-icons:bubble-loading" color="#ffffff" size="13"/>
-                                </span>
-                                likes
-                            </div>
+                        <div class="text-sm text-gray-500">
+                            <span>{{ post.likes }}</span> likes
                         </div>
                     </div>
                 </div>
@@ -96,44 +78,37 @@
 
 <script setup>
 import { useUserStore } from '~/stores/user';
+import { ref, computed } from 'vue';
 
 const userStore = useUserStore();
-const runtimeConfig = useRuntimeConfig();
-
-let isMenu = ref(false);
-let isLike = ref(false);
-let isDeleting = ref(false);
-
-const emit = defineEmits(['isDeleted']);
 const props = defineProps({ post: Object });
 
-const hasLikedComputed = computed(() => {
-    if (!props.post || !props.post.likes) return false;
-    return props.post.likes.some(like => like.userId === userStore.user?.id);
+onMounted(() => {
+    if (!props.post.likes || isNaN(props.post.likes)) {
+        props.post.likes = 0; // Par défaut, 0 likes
+    }
 });
 
-const deletePost = async () => {
-    if (!confirm("Are you sure you want to delete this post?")) return;
+const isLike = ref(false);
 
-    isMenu = false;
-    isDeleting = true;
-
-    try {
-        await $fetch(`/api/deletePost/${props.post.id}`, { method: 'DELETE' });
-        emit('isDeleted');
-    } catch (error) {
-        console.error("Erreur lors de la suppression du post:", error);
-    } finally {
-        isDeleting = false;
-    }
-};
+const hasLikedComputed = computed(() => {
+    return props.post.userHasLiked || false;
+});
 
 const toggleLike = async () => {
+    if (isLike.value) return; // Prevent spamming likes
     isLike.value = true;
+
     try {
         if (hasLikedComputed.value) {
+            // Unlike
+            props.post.likes = Math.max(0, props.post.likes - 1);
+            props.post.userHasLiked = false;
             await $fetch(`/api/unlikePost/${props.post.id}`, { method: 'DELETE' });
         } else {
+            // Like
+            props.post.likes += 1;
+            props.post.userHasLiked = true;
             await $fetch(`/api/likePost`, {
                 method: 'POST',
                 body: { postId: props.post.id, userId: userStore.user.id },
