@@ -3,21 +3,33 @@
       <div id="IndexPage" class="w-full overflow-auto">
         <div class="mx-auto max-w-[500px] overflow-hidden">
           <div id="Posts" class="px-4 max-w-[600px] mx-auto">
-            <div v-if="posts.length > 0" v-for="post in posts" :key="post.id" class="mb-4">
-              <div class="bg-black text-white p-4 rounded-lg shadow-md">
-                <div class="flex items-center mb-2">
-                  <img :src="post.image" alt="Profile" class="rounded-full h-[35px] mr-2">
-                  <div class="font-semibold text-[16px]">{{ post.name }}</div>
-                </div>
-                <div class="text-gray-300 mb-2">{{ post.text }}</div>
-                <div v-if="post.picture">
-                  <img :src="post.picture" alt="Post Image" class="rounded-lg w-full">
+            <!-- Loading and Empty State -->
+            <client-only>
+              <div v-if="isLoading" class="mt-20 w-full flex items-center justify-center mx-auto">
+                <div class="text-white mx-auto flex flex-col items-center justify-center">
+                  <Icon name="eos-icons:bubble-loading" size="50" color="#ffffff" />
+                  <div class="w-full mt-1">Loading...</div>
                 </div>
               </div>
+              <div v-if="!isLoading && posts.length === 0" class="mt-20 w-full flex items-center justify-center mx-auto">
+                <div class="text-white mx-auto flex flex-col items-center justify-center">
+                  <Icon name="tabler:mood-empty" size="50" color="#ffffff" />
+                  <div class="w-full">Make the first post!</div>
+                </div>
+              </div>
+            </client-only>
+  
+            <!-- Posts Section -->
+            <div v-if="posts.length > 0" v-for="post in posts" :key="post.id" class="mb-4">
+              <Post :post="post" @isDeleted="refreshPosts" />
             </div>
-            <div v-else>
+  
+            <!-- Fallback Message -->
+            <div v-else-if="!isLoading && posts.length === 0">
               <p class="text-white text-center">Aucun post disponible pour le moment.</p>
             </div>
+  
+            <div class="mt-60"></div>
           </div>
         </div>
       </div>
@@ -26,16 +38,32 @@
   
   <script setup>
   import MainLayout from '~/layouts/MainLayout.vue';
+  import Post from '~/components/Post.vue';
   import { ref, onMounted } from 'vue';
+  import { useUserStore } from '~/stores/user';
+  import { Icon } from '@iconify/vue';
   
-  let posts = ref([]);
+  const posts = ref([]);
+  const isLoading = ref(true);
+  const userStore = useUserStore();
+  
+  const refreshPosts = () => {
+    posts.value = userStore.getAllPosts();
+  };
   
   onMounted(() => {
-    // Récupérer les posts stockés localement
-    if (process.client) {
-      const storedPosts = JSON.parse(localStorage.getItem('posts')) || [];
-      posts.value = storedPosts;
-    }
+    // Simulate loading process
+    setTimeout(() => {
+      if (process.client) {
+        const storedPosts = JSON.parse(localStorage.getItem('posts')) || [];
+        posts.value = storedPosts;
+        isLoading.value = false;
+      }
+    }, 1000); // Adjust timeout as necessary
   });
   </script>
+  
+  <style scoped>
+  /* Add any additional styling if needed */
+  </style>
   
