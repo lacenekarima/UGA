@@ -106,8 +106,8 @@ let isDeleting = ref(false)
 const emit = defineEmits(['isDeleted'])
 const props = defineProps({ post: Object })
 
-const client = useSupabaseClient()
-const user = useSupabaseUser()
+//const client = useSupabaseClient()
+//const user = useSupabaseUser()
 
 const hasLikedComputed = computed(() => {
     if (!user.value) return 
