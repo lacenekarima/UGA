@@ -17,9 +17,9 @@
             <div id="Post" class="z-40 bottom-0 max-h-[100vh-200px] w-full px-3 max-w-[500px] mx-auto">
                 <div class=" py-2 w-full">
                     <div class="flex items-center">
-                        <div v-if="user" class="flex items-center text-white">
-                            <img class="rounded-full h-[35px]" :src="user.identities[0].identity_data.avatar_url">
-                            <div class="ml-2 font-semibold text-[18px]">{{ user.identities[0].identity_data.full_name }}</div>
+                        <div class="flex items-center text-white">
+                            <img class="rounded-full h-[35px]" :src="'/karima.png'">
+                            <div class="ml-2 font-semibold text-[18px]">Karima LACENE</div>
                         </div>
                     </div>
                     <div class="relative flex items-center w-full">
@@ -31,7 +31,7 @@
                                 <textarea
                                     v-model="text" 
                                     style="resize: none;" 
-                                    placeholder="Démarrer une discussion..." 
+                                    placeholder="Start a thread..." 
                                     id="textarea" 
                                     @input="adjustTextareaHeight()" 
                                     class="w-full bg-black outline-none"
@@ -73,7 +73,7 @@
                 <div v-if="!isLoading">Post</div>
                 <div v-else class="flex items-center gap-2 justify-center">
                     <Icon name="eos-icons:bubble-loading" size="25" /> 
-                    Veuillez patienter...
+                    Please wait...
                 </div>
             </button>
         </div>
@@ -81,12 +81,11 @@
 </template>
 
 <script setup>
-//import { v4 as uuidv4 } from 'uuid';
-//import { useUserStore } from '~/stores/user';
-//const userStore = useUserStore()
+import { v4 as uuidv4 } from 'uuid';
+import { useUserStore } from '~/stores/user';
+const userStore = useUserStore()
 
-//const client = useSupabaseClient()
-//const user = useSupabaseUser()
+
 
 let text = ref(null)
 let isLoading = ref(false)
@@ -112,6 +111,16 @@ const onChange = () => {
     fileDisplay.value = URL.createObjectURL(file.value.files[0])
     fileData.value = file.value.files[0]
 }
+
+
+
+
+
+
+
+
+
+
 
 const createPost = async () => {
     let dataOut = null;

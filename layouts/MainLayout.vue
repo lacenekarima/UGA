@@ -36,8 +36,6 @@
   const router = useRouter();
   const userStore = useUserStore();
   
-  function navigateTo(path) {
-    router.push(path);
-  }
+  
   </script>
   
