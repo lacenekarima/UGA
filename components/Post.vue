@@ -125,6 +125,18 @@
                             />
                             <span class="text-sm text-gray-400">{{ comments.length }}</span>
                         </button>
+
+                        <!-- Bouton Partager -->
+                        <button 
+                            @click="showShareMenu = true"
+                            class="flex items-center gap-1"
+                        >
+                            <Icon 
+                                class="p-1 text-white hover:bg-gray-800 rounded-full cursor-pointer" 
+                                name="material-symbols:share-outline" 
+                                size="28"
+                            />
+                        </button>
                     </div>
 
                     <!-- Liste des commentaires -->
@@ -233,6 +245,48 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal de partage -->
+        <div v-if="showShareMenu" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-neutral-900 rounded-lg p-6 max-w-md w-full mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl text-white font-semibold">Partager le post</h3>
+                    <button @click="showShareMenu = false" class="text-gray-400 hover:text-white">
+                        <Icon name="mdi:close" size="24" />
+                    </button>
+                </div>
+
+                <div class="bg-neutral-800 rounded-lg p-3 mb-4">
+                    <div class="flex items-center gap-2">
+                        <input 
+                            ref="shareInput"
+                            type="text" 
+                            :value="shareUrl"
+                            readonly
+                            class="w-full bg-transparent text-white border-none focus:outline-none text-sm"
+                        />
+                        <button 
+                            @click="copyToClipboard"
+                            class="text-blue-500 hover:text-blue-400 whitespace-nowrap text-sm"
+                        >
+                            {{ copied ? 'Copié !' : 'Copier' }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-4 gap-4">
+                    <button 
+                        v-for="option in shareOptions" 
+                        :key="option.name"
+                        @click="shareVia(option.name)"
+                        class="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-neutral-800 transition-colors"
+                    >
+                        <Icon :name="option.icon" size="24" :class="option.color" />
+                        <span class="text-white text-sm">{{ option.label }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -254,11 +308,53 @@ const isEditing = ref(false);
 const editedText = ref('');
 const showDeleteModal = ref(false);
 const notifications = ref([]);
+const showShareMenu = ref(false);
+const copied = ref(false);
+const shareInput = ref(null);
 
 // Computed
 const hasLikedComputed = computed(() => {
     return props.post.userHasLiked || false;
 });
+
+const shareUrl = computed(() => {
+    if (process.client) {
+        return `${window.location.origin}/post/${props.post.id}`;
+    }
+    return '';
+});
+
+// Options de partage
+const shareOptions = [
+    {
+        name: 'whatsapp',
+        label: 'WhatsApp',
+        icon: 'ri:whatsapp-fill',
+        color: 'text-green-500',
+        url: (text, url) => `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`
+    },
+    {
+        name: 'twitter',
+        label: 'Twitter',
+        icon: 'ri:twitter-fill',
+        color: 'text-blue-400',
+        url: (text, url) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`
+    },
+    {
+        name: 'facebook',
+        label: 'Facebook',
+        icon: 'ri:facebook-fill',
+        color: 'text-blue-600',
+        url: (text, url) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`
+    },
+    {
+        name: 'email',
+        label: 'Email',
+        icon: 'material-symbols:mail-outline',
+        color: 'text-gray-400',
+        url: (text, url) => `mailto:?subject=${encodeURIComponent(text)}&body=${encodeURIComponent(url)}`
+    }
+];
 
 // Gestion des notifications
 const addNotification = (message, type = 'info') => {
@@ -291,8 +387,15 @@ const cancelEdit = () => {
 
 const saveEdit = () => {
     if (editedText.value.trim()) {
-        emit('isUpdated', { ...props.post, text: editedText.value });
+        const updatedPost = {
+            ...props.post,
+            text: editedText.value,
+            editedAt: new Date().toISOString()
+        };
+        
+        emit('isUpdated', updatedPost);
         isEditing.value = false;
+        isMenu.value = false;
         addNotification('Post modifié avec succès', 'success');
     }
 };
@@ -319,6 +422,28 @@ const toggleLike = () => {
         props.post.likes += 1;
         props.post.userHasLiked = true;
     }
+};
+
+// Gestion du partage
+const copyToClipboard = async () => {
+    try {
+        await navigator.clipboard.writeText(shareUrl.value);
+        copied.value = true;
+        setTimeout(() => copied.value = false, 2000);
+        addNotification('Lien copié dans le presse-papiers', 'success');
+    } catch (err) {
+        addNotification('Erreur lors de la copie du lien', 'error');
+    }
+};
+
+const shareVia = (platform) => {
+    const option = shareOptions.find(opt => opt.name === platform);
+    if (option) {
+        const text = `Découvrez ce post de ${props.post.name}`;
+        const url = option.url(text, shareUrl.value);
+        window.open(url, '_blank');
+    }
+    showShareMenu.value = false;
 };
 
 // Gestion des commentaires
@@ -371,20 +496,6 @@ const addComment = () => {
         showCommentInput.value = false;
         addNotification('Commentaire ajouté', 'success');
     }
-    const saveEdit = () => {
-    if (editedText.value.trim()) {
-        const updatedPost = {
-            ...props.post,
-            text: editedText.value,
-            editedAt: new Date().toISOString()
-        };
-        
-        emit('isUpdated', updatedPost);
-        isEditing.value = false;
-        isMenu.value = false;
-        addNotification('Post modifié avec succès', 'success');
-    }
-};
 };
 </script>
 
@@ -402,6 +513,14 @@ const addComment = () => {
 
 .group:hover .hidden {
     display: block;
+}
+
+.share-option {
+    transition: all 0.2s ease;
+}
+
+.share-option:hover {
+    transform: scale(1.05);
 }
 
 input::placeholder,
