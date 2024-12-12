@@ -1,6 +1,5 @@
 <template>
     <div v-if="post" class="z-50 bottom-0 h-full w-full">
-<<<<<<< HEAD
         <!-- Système de notifications -->
         <div class="fixed top-4 right-4 z-50">
             <TransitionGroup name="notification">
@@ -20,18 +19,11 @@
 
         <div class="py-2 w-full">
             <!-- En-tête du post -->
-=======
-        <div class="py-2 w-full">
->>>>>>> cde07d023fac7ddf59019db7e6779f9a12170fe6
             <div class="flex items-center justify-between">
                 <div class="flex items-center text-white">
                     <img class="rounded-full h-[35px]" :src="post.image" alt="User Image">
                     <div class="ml-2 font-semibold text-[18px]">{{ post.name }}</div>
                 </div>
-<<<<<<< HEAD
-=======
-                <!-- Bouton pour afficher le menu des trois points -->
->>>>>>> cde07d023fac7ddf59019db7e6779f9a12170fe6
                 <div @click="isMenu = !isMenu" class="relative">
                     <button 
                         :disabled="isDeleting"
@@ -41,7 +33,6 @@
                         <Icon v-if="!isDeleting" name="bi:three-dots" color="#ffffff" size="18" />
                         <Icon v-else name="eos-icons:bubble-loading" color="#ffffff" size="18" />
                     </button>
-<<<<<<< HEAD
                     <div v-if="isMenu" class="absolute border border-gray-600 right-0 z-20 mt-1 rounded bg-black">
                         <button 
                             @click="startEditing" 
@@ -55,31 +46,18 @@
                             class="flex items-center rounded gap-2 text-red-500 justify-between w-full pl-4 pr-3 py-2 hover:bg-gray-900"
                         >
                             <div>Supprimer</div>
-=======
-                    <!-- Menu déroulant pour supprimer -->
-                    <div v-if="isMenu" class="absolute border border-gray-600 right-0 z-20 mt-1 rounded">
-                        <button 
-                            @click="deletePost(post.id)" 
-                            class="flex items-center rounded gap-2 text-red-500 justify-between bg-black w-full pl-4 pr-3 py-1 hover:bg-gray-900"
-                        >
-                            <div>Delete</div>
->>>>>>> cde07d023fac7ddf59019db7e6779f9a12170fe6
                             <Icon name="solar:trash-bin-trash-broken" size="20" />
                         </button>
                     </div>
                 </div>
             </div>
 
-<<<<<<< HEAD
             <!-- Corps du post -->
-=======
->>>>>>> cde07d023fac7ddf59019db7e6779f9a12170fe6
             <div class="relative flex items-center w-full">
                 <div class="w-[42px] mx-auto">
                     <div class="absolute ml-4 mt-1 top-0 w-[1px] bg-gray-700 h-full"></div>
                 </div>
                 <div class="bg-black rounded-lg w-[calc(100%-50px)] text-sm w-full font-light">
-<<<<<<< HEAD
                     <!-- Mode édition -->
                     <div v-if="isEditing" class="py-2">
                         <textarea
@@ -116,16 +94,6 @@
 
                     <!-- Boutons d'interaction -->
                     <div class="flex items-center gap-6 mt-4 ml-2">
-=======
-                    <div class="py-2 text-gray-300">{{ post.text }}</div>
-                    <img 
-                        v-if="post.picture"
-                        class="mx-auto w-full mt-2 pr-2 rounded" 
-                        :src="post.picture" 
-                        alt="Post Image"
-                    />
-                    <div class="absolute mt-2 w-full ml-2">
->>>>>>> cde07d023fac7ddf59019db7e6779f9a12170fe6
                         <button 
                             :disabled="isLike"
                             @click="toggleLike" 
@@ -143,7 +111,6 @@
                                 name="mdi:cards-heart" 
                                 size="28"
                             />
-<<<<<<< HEAD
                             <span class="text-sm text-gray-400">{{ post.likes || 0 }}</span>
                         </button>
 
@@ -239,24 +206,12 @@
                                     size="20" 
                                 />
                             </button>
-=======
-                        </button>
-                        <div class="relative text-sm text-gray-500">
-                            <div> 
-                                <span v-if="!isLike">{{ post.likes }}</span>
-                                <span v-else>
-                                    <Icon name="eos-icons:bubble-loading" color="#ffffff" size="13" />
-                                </span>
-                                likes
-                            </div>
->>>>>>> cde07d023fac7ddf59019db7e6779f9a12170fe6
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-<<<<<<< HEAD
         <!-- Modal de confirmation de suppression -->
         <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div class="bg-neutral-900 rounded-lg p-6 max-w-md w-full mx-4">
@@ -278,26 +233,6 @@
                 </div>
             </div>
         </div>
-=======
-        <div class="relative inline-block text-gray-500 pt-1 pb-1.5">
-            <div class="flex items-center">
-                <div class="flex items-center flex-wrap text-white gap-1 w-[42px]">
-                    <div class="flex gap-0.5">
-                        <img class="rounded-full h-[14px] mt-2" src="https://picsum.photos/id/202/50" alt="User 1">
-                        <img class="rounded-full h-[17px]" src="https://picsum.photos/id/223/50" alt="User 2">
-                    </div>
-                    <div class="flex items-center">
-                        <img class="rounded-full h-[11px] ml-4" src="https://picsum.photos/id/99/50" alt="User 3">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="h-[1px] bg-gray-800 w-full mt-3"></div>
-    </div>
-    <div v-else>
-        <p class="text-white">Chargement...</p>
->>>>>>> cde07d023fac7ddf59019db7e6779f9a12170fe6
     </div>
 </template>
 
@@ -306,7 +241,6 @@ import { ref, computed } from 'vue';
 import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({ post: Object });
-<<<<<<< HEAD
 const emit = defineEmits(['isDeleted', 'isUpdated']);
 
 // États
@@ -322,19 +256,10 @@ const showDeleteModal = ref(false);
 const notifications = ref([]);
 
 // Computed
-=======
-const emit = defineEmits(['isDeleted']);
-
-const isMenu = ref(false); // Gère l'état du menu des trois points
-const isDeleting = ref(false);
-const isLike = ref(false);
-
->>>>>>> cde07d023fac7ddf59019db7e6779f9a12170fe6
 const hasLikedComputed = computed(() => {
     return props.post.userHasLiked || false;
 });
 
-<<<<<<< HEAD
 // Gestion des notifications
 const addNotification = (message, type = 'info') => {
     const id = Date.now();
@@ -384,8 +309,6 @@ const confirmDelete = () => {
 };
 
 // Gestion des likes
-=======
->>>>>>> cde07d023fac7ddf59019db7e6779f9a12170fe6
 const toggleLike = () => {
     if (!props.post.likes) props.post.likes = 0;
 
@@ -398,7 +321,6 @@ const toggleLike = () => {
     }
 };
 
-<<<<<<< HEAD
 // Gestion des commentaires
 const toggleCommentMenu = (commentId) => {
     comments.value = comments.value.map(comment => ({
@@ -479,10 +401,3 @@ textarea:focus {
     border-color: #4B5563;
 }
 </style>
-=======
-const deletePost = (postId) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer ce post ?")) return;
-    emit('isDeleted', postId);
-};
-</script>
->>>>>>> cde07d023fac7ddf59019db7e6779f9a12170fe6
