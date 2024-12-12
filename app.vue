@@ -19,6 +19,15 @@
 
 <script setup>
 import { useUserStore } from '~/stores/user';
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
 const userStore = useUserStore()
+onMounted(() => {
+  // Vérifie si l'utilisateur est authentifié
+  if (!localStorage.getItem('credentials')) {
+    router.push('/auth/login'); // Redirige vers la page de connexion
+  }
+});
 </script>
 

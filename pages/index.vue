@@ -56,6 +56,7 @@ import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '~/stores/user';
 import { Icon } from '@iconify/vue';
+import Post from '~/components/Post.vue';
 
 const userStore = useUserStore();
 const isLoading = ref(true);
