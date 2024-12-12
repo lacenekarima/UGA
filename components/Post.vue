@@ -371,6 +371,20 @@ const addComment = () => {
         showCommentInput.value = false;
         addNotification('Commentaire ajouté', 'success');
     }
+    const saveEdit = () => {
+    if (editedText.value.trim()) {
+        const updatedPost = {
+            ...props.post,
+            text: editedText.value,
+            editedAt: new Date().toISOString()
+        };
+        
+        emit('isUpdated', updatedPost);
+        isEditing.value = false;
+        isMenu.value = false;
+        addNotification('Post modifié avec succès', 'success');
+    }
+};
 };
 </script>
 

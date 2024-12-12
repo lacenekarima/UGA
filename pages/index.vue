@@ -18,7 +18,11 @@
                         </div>
                     </client-only>
                     <div v-if="posts.length > 0" v-for="post in posts" :key="post.id" class="mb-4">
-                        <Post :post="post" @isDeleted="removePost" />
+                        <Post 
+                            :post="post" 
+                            @isDeleted="removePost"
+                            @isUpdated="updatePost"
+                        />
                     </div>
                 </div>
             </div>
@@ -42,6 +46,22 @@ const removePost = (postId) => {
     // Met à jour localStorage
     if (process.client) {
         localStorage.setItem('posts', JSON.stringify(posts.value));
+    }
+};
+
+const updatePost = (updatedPost) => {
+    // Trouve et met à jour le post
+    const index = posts.value.findIndex(p => p.id === updatedPost.id);
+    if (index !== -1) {
+        posts.value[index] = { ...updatedPost };
+        
+        // Force la réactivité en créant un nouveau tableau
+        posts.value = [...posts.value];
+
+        // Met à jour localStorage
+        if (process.client) {
+            localStorage.setItem('posts', JSON.stringify(posts.value));
+        }
     }
 };
 
