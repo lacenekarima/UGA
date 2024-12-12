@@ -3,10 +3,7 @@
         <div class="bg-black h-full w-full text-white overflow-auto">
             <div class="flex items-center justify-start py-4 max-w-[500px] mx-auto border-b border-b-gray-700">
                 <button 
-                    @click="
-                        userStore.isMenuOverlay = false;
-                        clearData();
-                    "
+                    @click="closeCreate"
                     class="rounded-full px-2"
                 >
                     <Icon name="mdi:close" size="25"/>
@@ -18,8 +15,8 @@
                 <div class="py-2 w-full">
                     <div class="flex items-center">
                         <div class="flex items-center text-white">
-                            <img class="rounded-full h-[35px]" src="/karima.png" alt="Karima LACENE">
-                            <div class="ml-2 font-semibold text-[18px]">Karima LACENE</div>
+                            <img class="rounded-full h-[35px]" :src="userStore.currentUser.image" :alt="userStore.currentUser.name">
+                            <div class="ml-2 font-semibold text-[18px]">{{ userStore.currentUser.name }}</div>
                         </div>
                     </div>
                     <div class="relative flex items-center w-full">
@@ -115,6 +112,11 @@ const clearData = () => {
     }
 };
 
+const closeCreate = () => {
+    userStore.isMenuOverlay = false;
+    clearData();
+};
+
 const clearImage = () => {
     fileDisplay.value = null;
     if (file.value) {
@@ -143,22 +145,17 @@ const createPost = async () => {
 
         const newPost = {
             id: uuidv4(),
-            name: 'Karima LACENE',
-            image: '/karima.png',
+            name: userStore.currentUser.name,
+            image: userStore.currentUser.image,
             text: text.value,
             picture: fileDisplay.value,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            likes: 0,
+            comments: []
         };
 
-        // Store the post locally
-        if (process.client) {
-            const storedPosts = JSON.parse(localStorage.getItem('posts')) || [];
-            storedPosts.unshift(newPost);
-            localStorage.setItem('posts', JSON.stringify(storedPosts));
-        }
-
-        userStore.isMenuOverlay = false;
-        clearData();
+        userStore.addPost(newPost);
+        closeCreate();
     } catch (error) {
         console.error('Error creating post:', error);
         alert('Une erreur est survenue lors de la création du post');
@@ -169,11 +166,6 @@ const createPost = async () => {
 </script>
 
 <style scoped>
-.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 textarea::placeholder {
     color: #6B7280;
 }

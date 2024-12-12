@@ -1,65 +1,68 @@
 <template>
-    <div class="w-full bg-black text-white py-4 border-b border-gray-800">
-        <!-- Barre de progression en haut -->
-        <div class="flex gap-1 px-4 mb-4">
-            <div v-for="(item, index) in story.items" :key="index" class="h-[2px] flex-grow">
-                <div 
-                    :class="[
-                        'h-full bg-gray-500 transition-all duration-100',
-                        currentIndex > index ? 'w-full' : 
-                        currentIndex === index ? 'animate-progress' : 
-                        'w-0'
-                    ]"
-                ></div>
+    <div class="w-full h-screen bg-black text-white">
+        <!-- Header avec boutons -->
+        <div class="fixed top-0 w-full z-50 bg-black/50 py-4">
+            <!-- Barre de progression -->
+            <div class="flex gap-1 px-4 mb-4">
+                <div v-for="(item, index) in story.items" :key="index" class="h-[2px] flex-grow">
+                    <div 
+                        :class="[
+                            'h-full bg-gray-500 transition-all duration-100',
+                            currentIndex > index ? 'w-full' : 
+                            currentIndex === index ? 'animate-progress' : 
+                            'w-0'
+                        ]"
+                    ></div>
+                </div>
+            </div>
+
+            <!-- En-tête avec boutons -->
+            <div class="flex items-center justify-between px-4">
+                <div class="flex items-center gap-2">
+                    <img :src="story.userImage" class="w-8 h-8 rounded-full" />
+                    <span class="font-semibold">{{ story.userName }}</span>
+                    <span class="text-gray-400 text-sm">{{ formatTime(story.items[currentIndex].timestamp) }}</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <!-- Bouton supprimer -->
+                    <button 
+                        v-if="story.userName === 'Karima LACENE'"
+                        @click="handleDelete"
+                        class="p-2 text-red-500 hover:text-red-400 transition-colors"
+                    >
+                        <Icon name="mdi:delete" size="24" />
+                    </button>
+                    <!-- Bouton fermer -->
+                    <button 
+                        @click="handleClose"
+                        class="p-2 text-white hover:text-gray-300 transition-colors"
+                    >
+                        <Icon name="mdi:close" size="24" />
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- En-tête -->
-       <div class="flex items-center justify-between px-4 mb-2">
-    <div class="flex items-center gap-2">
-        <img :src="story.userImage" class="w-8 h-8 rounded-full" />
-        <span class="font-semibold">{{ story.userName }}</span>
-        <span class="text-gray-400 text-sm">{{ formatTime(story.items[currentIndex].timestamp) }}</span>
-    </div>
-    <div class="flex gap-4">
-        <!-- Ajout du bouton supprimer -->
-        <button 
-            v-if="story.userName === 'Asmaa Bourass'" 
-            @click="$emit('delete-story')" 
-            class="text-red-500 hover:text-red-400"
-        >
-            <Icon name="mdi:delete" size="24" />
-        </button>
-        <button @click="$emit('close')" class="text-white">
-            <Icon name="mdi:close" size="24" />
-        </button>
-    </div>
-</div>
-
-
         <!-- Contenu de la story -->
-        <div class="relative h-[calc(100vh-150px)]">
+        <div class="h-screen flex items-center justify-center">
             <img 
                 :src="story.items[currentIndex].media" 
-                class="w-full h-full object-contain"
+                class="max-h-screen w-full object-contain"
                 @click="handleClick"
             />
-            
-            <!-- Navigation -->
-            <button 
-                @click="previousStory" 
-                class="absolute left-0 top-0 w-1/2 h-full opacity-0"
-            />
-            <button 
-                @click="nextStory" 
-                class="absolute right-0 top-0 w-1/2 h-full opacity-0"
-            />
+        </div>
+
+        <!-- Zones de navigation tactile -->
+        <div class="fixed inset-0 flex" @click="handleClick">
+            <div class="w-1/2" @click.stop="previousStory"></div>
+            <div class="w-1/2" @click.stop="nextStory"></div>
         </div>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     story: {
@@ -68,7 +71,7 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['close', 'next', 'previous']);
+const emit = defineEmits(['close', 'next', 'previous', 'delete-story']);
 
 const currentIndex = ref(0);
 let timer;
@@ -78,11 +81,22 @@ const formatTime = (timestamp) => {
     return date.toLocaleString();
 };
 
+const handleClose = () => {
+    clearTimeout(timer);
+    emit('close');
+};
+
+const handleDelete = () => {
+    if (confirm('Voulez-vous vraiment supprimer cette story ?')) {
+        emit('delete-story');
+    }
+};
+
 const startTimer = () => {
     clearTimeout(timer);
     timer = setTimeout(() => {
         nextStory();
-    }, 5000); // Chaque story dure 5 secondes
+    }, 5000);
 };
 
 const nextStory = () => {
@@ -115,12 +129,20 @@ const handleClick = (event) => {
     }
 };
 
+const handleEscapeKey = (e) => {
+    if (e.key === 'Escape') {
+        handleClose();
+    }
+};
+
 onMounted(() => {
     startTimer();
+    document.addEventListener('keydown', handleEscapeKey);
 });
 
 onUnmounted(() => {
     clearTimeout(timer);
+    document.removeEventListener('keydown', handleEscapeKey);
 });
 </script>
 

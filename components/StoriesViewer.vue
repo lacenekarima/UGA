@@ -12,7 +12,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
+import Story from './Story.vue';
 
 const props = defineProps({
     stories: {
@@ -36,9 +37,9 @@ const closeStories = () => {
 };
 
 const deleteCurrentStory = () => {
-    const storyId = currentStory.value.id;
-    emit('delete-story', storyId);
-    closeStories();
+    if (currentStory.value) {
+        emit('delete-story', currentStory.value.id);
+    }
 };
 
 const nextUser = () => {
@@ -54,4 +55,11 @@ const previousUser = () => {
         currentIndex.value--;
     }
 };
+
+// Watch for stories array changes
+watch(() => props.stories.length, (newLength) => {
+    if (newLength === 0 || currentIndex.value >= newLength) {
+        closeStories();
+    }
+});
 </script>
